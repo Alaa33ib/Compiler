@@ -1,0 +1,254 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
+#include <parser.tab.h>
+
+int line = 1;
+int column = 1;
+%}
+
+%option noyywrap
+
+
+%%
+"program" {
+    return(PROGRAM);
+    column += 7;
+}
+
+"beginprogram" {
+    return(BEGIN_PROGRAM);
+    column += 12;
+}
+
+"endprogram" {
+    return(END_PROGRAM);
+    column += 10;
+}
+
+"integer" {
+    return(INTEGER);
+    column += 7;
+}
+
+"array" {
+    return(ARRAY);
+    column += 5;
+}
+
+"of" {
+    return(OF);
+    column += 2;
+}
+
+"if" {
+    return(IF);
+    column += 2;
+}
+
+"then" {
+    return(THEN);
+    column += 4;
+}
+
+"endif" {
+    return(ENDIF);
+    column += 5;
+}
+
+"else" {
+    return(ELSE);
+    column += 4;
+}
+
+"while" {
+    return(WHILE);
+    column += 5;
+}
+
+"loop" {
+    return(LOOP);
+    column += 4;
+}
+
+"endloop" {
+    return(ENDLOOP);
+    column += 7;
+}
+
+"read" {
+    return(READ);
+    column += 4;
+}
+
+"write" {
+    return(WRITE);
+    column += 5;
+}
+
+"and" {
+    return(AND);
+    column += 3;
+}
+
+"or" {
+    return(OR);
+    column += 2;
+}
+
+"not" {
+    return(NOT);
+    column += 3;
+}
+
+"true" {
+    return(TRUE);
+    column += 4;
+}
+
+"false" {
+    return(FALSE);
+    column += 5;
+}
+
+"-" {
+    return(SUB);
+    column += 1;
+}
+
+"+" {
+    return(ADD);
+    column += 1;
+}
+
+"*" {
+    return(MULT);
+    column += 1;
+}
+
+"/" {
+    return(DIV);
+    column += 1;
+}
+
+"=" {
+    return(EQ);
+    column += 1;
+}
+
+"<>" {
+    return(NEQ);
+    column += 2;
+}
+
+"<" {
+    return(LT);
+    column += 1;
+}
+
+">" {
+    return(GT);
+    column += 1;
+}
+
+"<=" {
+    return(LTE);
+    column += 2;
+}
+
+">=" {
+    return(GTE);
+    column += 2;
+}
+
+
+[a-zA-Z][a-zA-Z0-9_]{0,6}[a-zA-Z0-9]{0,1} {
+
+    if (yytext[yyleng - 1] == '_') {
+        printf("Error at line %d, column %d: identifier '%s' cannot end with an underscore.\n", line, column, yytext);
+        exit(EXIT_FAILURE);
+    }
+    
+    if (yytext[0] == '_' || isdigit(yytext[0])) {
+        printf("Error at line %d, column %d: identifier '%s' must begin with a letter.\n", line, column, yytext);
+        exit(EXIT_FAILURE);
+    }
+    
+    return(IDENT);
+    column += yyleng;
+}
+
+[0-9]+ {
+    return(NUMBER);
+    column += yyleng;
+}
+
+
+";" {
+    return(SEMICOLON);
+    column += 1;
+}
+
+":" {
+    return(COLON);
+    column += 1;
+}
+
+"," {
+    return(COMMA);
+    column += 1;
+}
+
+"(" {
+    return(L_PAREN);
+    column += 1;
+}
+
+")" {
+    return(R_PAREN);
+    column += 1;
+}
+
+":=" {
+    return(ASSIGN);
+    column += 2;
+}
+
+"--".* {
+    /* Comment, ignore */
+}
+
+[\t ]+ {
+    column += yyleng;
+}
+
+\n {
+    line++;
+    column = 1;
+}
+
+. {
+    printf("Error: at line %d, column %d: unrecognized symbol '%s'\n", line, column, yytext);
+    exit(EXIT_FAILURE);
+}
+
+%%
+
+
+int main() {
+    char codeFile[100];
+    printf("Enter the code file");
+    scanf("%s",codeFile);
+    
+    FILE *fileIn = fopen(codeFile, "r");
+    if (!fileIn) {
+        printf("Error: file not opened successfully.\n");
+        return 1;
+    }
+    yyin = fileIn;
+    yylex();
+    fclose(fileIn);
+    return 0;
+}
