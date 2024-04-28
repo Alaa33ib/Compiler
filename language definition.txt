@@ -1,0 +1,62 @@
+program : PROGRAM identifier SEMICOLON declarations compound_statement DOT
+
+declarations : declaration declarations | ε
+
+declaration : identifier COLON type SEMICOLON
+
+type : INTEGER | REAL
+
+compound_statement : BEGIN statement_sequence END
+
+statement_sequence : statement SEMICOLON statement_sequence | statement SEMICOLON
+
+statement : assignment_statement | if_statement | while_statement | read_statement | write_statement
+
+assignment_statement : identifier ASSIGN_OP expression
+
+if_statement : IF condition THEN statement_sequence ELSE statement_sequence
+
+while_statement : WHILE condition DO statement_sequence
+
+read_statement : READ identifier
+
+write_statement : WRITE expression
+
+condition : expression RELOP expression
+
+expression : term expression_tail
+
+expression_tail : ADDOP term expression_tail | ε
+
+term : factor term_tail
+
+term_tail : MULOP factor term_tail | ε
+
+factor : LPAREN expression RPAREN | identifier | number
+
+identifier : ID
+
+number : NUM
+
+PROGRAM : 'program'
+BEGIN : 'begin'
+END : 'end'
+READ : 'read'
+WRITE : 'write'
+IF : 'if'
+THEN : 'then'
+ELSE : 'else'
+WHILE : 'while'
+DO : 'do'
+
+SEMICOLON : ';'
+COLON : ':'
+ASSIGN_OP : ':='
+RELOP : '<' | '>' | '='
+ADDOP : '+' | '-'
+MULOP : '*' | '/'
+LPAREN : '('
+RPAREN : ')'
+
+ID : [a-zA-Z][a-zA-Z0-9_]{0,6}[a-zA-Z0-9]
+NUM : [0-9]+

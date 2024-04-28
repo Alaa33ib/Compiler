@@ -1,0 +1,133 @@
+%{
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include "lex.yy.c" 
+%}
+
+%token PROGRAM BEGIN END READ WRITE IF THEN ELSE WHILE DO
+%token SEMICOLON COLON ASSIGN_OP RELOP ADDOP MULOP
+%token LPAREN RPAREN ID NUM
+
+%%
+
+program : PROGRAM identifier SEMICOLON declarations compound_statement DOT {
+    // maybe  SymbolTable.initialize();
+}
+
+declarations : declaration declarations {
+    // Semantic actions for multiple declarations
+}
+             | /* empty */ {
+    // Semantic actions when no declarations are present
+}
+
+declaration : identifier COLON type SEMICOLON {
+    // Semantic actions for declaration
+}
+
+type : INTEGER {
+    // Semantic actions for INTEGER type
+}
+     | REAL {
+    // Semantic actions for REAL type
+}
+
+compound_statement : BEGIN statement_sequence END {
+    // Semantic actions for compound statement
+}
+
+statement_sequence : statement SEMICOLON statement_sequence {
+    // Semantic actions for multiple statements
+}
+                    | statement SEMICOLON {
+    // Semantic actions for single statement
+}
+
+statement : assignment_statement {
+    // Semantic actions for assignment statement
+}
+          | if_statement {
+    // Semantic actions for if statement
+}
+          | while_statement {
+    // Semantic actions for while statement
+}
+          | read_statement {
+    // Semantic actions for read statement
+}
+          | write_statement {
+    // Semantic actions for write statement
+}
+
+assignment_statement : identifier ASSIGN_OP expression {
+    // Semantic actions for assignment statement
+}
+
+if_statement : IF condition THEN statement_sequence ELSE statement_sequence {
+    // Semantic actions for if statement
+}
+
+while_statement : WHILE condition DO statement_sequence {
+    // Semantic actions for while statement
+}
+
+read_statement : READ identifier {
+    // Semantic actions for read statement
+}
+
+write_statement : WRITE expression {
+    // Semantic actions for write statement
+}
+
+condition : expression RELOP expression {
+    // Semantic actions for condition
+}
+
+expression : term expression_tail {
+    // Semantic actions for expression
+}
+
+expression_tail : ADDOP term expression_tail {
+    // Semantic actions for expression tail with addition or subtraction
+}
+                 | /* empty */ {
+    // Semantic actions when no more additions or subtractions are present
+}
+
+term : factor term_tail {
+    // Semantic actions for term
+}
+
+term_tail : MULOP factor term_tail {
+    // Semantic actions for term tail with multiplication or division
+}
+           | /* empty */ {
+    // Semantic actions when no more multiplications or divisions are present
+}
+
+factor : LPAREN expression RPAREN {
+    // Semantic actions for expression within parentheses
+}
+       | identifier {
+    // Semantic actions for identifier
+}
+       | NUM {
+    // Semantic actions for number
+}
+
+identifier : ID {
+    // Semantic actions for identifier
+}
+
+%%
+
+int main() {
+    yyparse(); // Start parsing
+    return 0;
+}
+
+void yyerror(const char *msg) {
+    fprintf(stderr, "Syntax error: %s at line %d\n", msg, line_number);
+    //exit(EXIT_FAILURE);
+}

@@ -1,0 +1,28 @@
+program -> 'program' identifier ';' declarations compound_statement '.'
+declarations -> declaration declarations | ε
+declaration -> identifier ':' type ';'
+type -> 'integer'
+compound_statement -> 'beginprogram' statement_sequence 'endprogram'
+statement_sequence -> statement ';' statement_sequence | statement ';'
+statement ->
+    assignment_statement |
+    if_statement |
+    while_statement |
+    read_statement |
+    write_statement
+assignment_statement -> identifier ':=' expression
+if_statement -> 'if' condition 'then' statement_sequence 'else' statement_sequence
+while_statement -> 'while' condition 'do' statement_sequence
+read_statement -> 'read' identifier
+write_statement -> 'write' expression
+condition -> expression relop expression
+relop -> '<' | '>' | '='
+expression -> term expression_prime
+expression_prime -> addop term expression_prime | ε
+addop -> '+' | '-'
+term -> factor term_prime
+term_prime -> mulop factor term_prime | ε
+mulop -> '*' | '/'
+factor -> '(' expression ')' | identifier | number
+identifier -> LETTER (LETTER | DIGIT | '_')*
+number -> DIGIT+
