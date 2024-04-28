@@ -12,112 +12,120 @@
 %%
 
 program : PROGRAM identifier SEMICOLON declarations compound_statement DOT {
-    // maybe  SymbolTable.initialize();
+    SymbolTable.initialize();
 }
 
 declarations : declaration declarations {
-    // Semantic actions for multiple declarations
+    SymbolTable.addVariable($1.identifier, $3.type);
 }
              | /* empty */ {
-    // Semantic actions when no declarations are present
+    // nothing is done
 }
 
 declaration : identifier COLON type SEMICOLON {
-    // Semantic actions for declaration
+    $$.identifier = $1;
+    $$.type = $3;
 }
 
 type : INTEGER {
-    // Semantic actions for INTEGER type
+    $$ = INTEGER;
 }
      | REAL {
-    // Semantic actions for REAL type
+    $$ = REAL;
 }
 
 compound_statement : BEGIN statement_sequence END {
-    // Semantic actions for compound statement
+     ProcessStatements($2);
 }
 
 statement_sequence : statement SEMICOLON statement_sequence {
-    // Semantic actions for multiple statements
+    ProcessStatement($1);
+    ProcessStatementSequence($3);
 }
                     | statement SEMICOLON {
-    // Semantic actions for single statement
+    ProcessStatement($1);
 }
 
 statement : assignment_statement {
-    // Semantic actions for assignment statement
+    ProcessStatement($1);
 }
           | if_statement {
-    // Semantic actions for if statement
+    ProcessIf($1);
 }
           | while_statement {
-    // Semantic actions for while statement
+    ProcessWhile($1);
 }
           | read_statement {
-    // Semantic actions for read statement
+    ProcessRead($1);
 }
           | write_statement {
-    // Semantic actions for write statement
+    ProcessWrite($1);
 }
 
 assignment_statement : identifier ASSIGN_OP expression {
-    // Semantic actions for assignment statement
+    UpdateVariableValue($1, $3);
 }
 
 if_statement : IF condition THEN statement_sequence ELSE statement_sequence {
-    // Semantic actions for if statement
+     if ($2) {
+        ExecuteStatementSequence($4); // Execute THEN part
+    } else {
+        ExecuteStatementSequence($6); // Execute ELSE part
+    }
 }
 
 while_statement : WHILE condition DO statement_sequence {
-    // Semantic actions for while statement
+    while ($2) {
+        ExecuteStatementSequence($4);
+    }
 }
 
 read_statement : READ identifier {
-    // Semantic actions for read statement
+    $2.value = ReadInput();
 }
 
 write_statement : WRITE expression {
-    // Semantic actions for write statement
+    OutputValue(EvaluateExpression($2));
 }
 
 condition : expression RELOP expression {
-    // Semantic actions for condition
+    $$ = CompareExpressions($1, $3, $2);
 }
 
 expression : term expression_tail {
-    // Semantic actions for expression
+    $$ = EvaluateExpression($1, $2);
 }
 
 expression_tail : ADDOP term expression_tail {
-    // Semantic actions for expression tail with addition or subtraction
+    $$ = PerformAdditionOrSubtraction($1, $2, $3);
 }
                  | /* empty */ {
-    // Semantic actions when no more additions or subtractions are present
+    $$ = NULL;
 }
 
 term : factor term_tail {
-    // Semantic actions for term
+     $$ = EvaluateTerm($1, $2);
 }
 
 term_tail : MULOP factor term_tail {
-    // Semantic actions for term tail with multiplication or division
+    $$ = PerformMultiplicationOrDivision($1, $2, $3);
 }
            | /* empty */ {
-    // Semantic actions when no more multiplications or divisions are present
+    $$ = NULL;
 }
 
 factor : LPAREN expression RPAREN {
-    // Semantic actions for expression within parentheses
+    $$ = $2;
 }
        | identifier {
-    // Semantic actions for identifier
+    $$ = GetValueOfIdentifier($1);
 }
        | NUM {
-    // Semantic actions for number
+    $$ = $1;
 }
 
 identifier : ID {
-    // Semantic actions for identifier
+    $$ = $1;
 }
 
 %%
